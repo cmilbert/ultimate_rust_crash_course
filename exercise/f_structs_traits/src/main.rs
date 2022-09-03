@@ -17,7 +17,7 @@ trait Bite {
 // struct Grapes...
 #[derive(Debug)]
 struct Grapes {
-    grapes_remaining: i32
+    grapes_remaining: i32,
 }
 
 // 3. Implement Bite for Grapes.  When you bite a Grapes, subtract 1 from how many grapes are left.
@@ -32,14 +32,18 @@ impl Bite for Grapes {
 
 fn main() {
     // Once you finish #1 above, this part should work.
-    let mut carrot = Carrot { percent_left: 100.0 };
+    let mut carrot = Carrot {
+        percent_left: 100.0,
+    };
     carrot.bite();
     println!("I take a bite: {:?}", carrot);
 
     // 4. Uncomment and adjust the code below to match how you defined your
     // Grapes struct.
     //
-    let mut grapes = Grapes { grapes_remaining: 100 };
+    let mut grapes = Grapes {
+        grapes_remaining: 100,
+    };
     grapes.bite();
     println!("Eat a grape: {:?}", grapes);
 
