@@ -27,19 +27,22 @@
 
 use clap::Parser;
 use mirage::args::Args;
+use image::{ImageError, DynamicImage};
 
-fn main() {
+fn main() -> Result<(), ImageError>{
     let args = Args::parse();
 
     println!("Using input file: {}", args.infile);
     println!("Using output file: {}", args.outfile);
 
+    let mut img = image::open(args.infile.clone()).expect("Failed to open INFILE.");
+
     if args.blur != 0.0 {
-        blur(&args.infile, &args.outfile, args.blur);
+        img = img.blur(args.blur);
     }
 
     if args.brighten != 0 {
-        brighten(&args.infile, &args.outfile, args.brighten);
+        img = img.brighten(args.brighten);
     }
 
     if args.fractal {
@@ -47,21 +50,19 @@ fn main() {
     }
 
     if args.invert {
-        invert(&args.infile, &args.outfile);
+        img.invert();
     }
 
     if args.grayscale {
-        grayscale(&args.infile, &args.outfile);
+        img = img.grayscale();
     }
 
     if args.rotation != 0.0 {
-        rotate(&args.infile, &args.outfile, args.rotation);
+        img = rotate(img.clone(), args.rotation);
     }
 
     if args.width != 0 && args.height != 0 {
-        crop(
-            &args.infile,
-            &args.outfile,
+        img = img.crop(
             args.x_offset,
             args.y_offset,
             args.width,
@@ -71,51 +72,22 @@ fn main() {
         println!("Crop requires a width and height");
     }
 
-    // **OPTION**
+        // **OPTION**
     // Generate -- see the generate() function below -- this should be sort of like "fractal()"!
+
+    img.save(args.outfile).expect("Failed writing OUTFILE.");
+
+    Ok(())
 }
 
-fn blur(infile: &String, outfile: &String, blur_amount: f32) {
-    let img = image::open(infile).expect("Failed to open INFILE.");
-    let img2 = img.blur(blur_amount);
-    img2.save(outfile).expect("Failed writing OUTFILE.");
-}
-
-fn brighten(infile: &String, outfile: &String, brighten_amount: i32) {
-    let img = image::open(infile).expect("Failed to open INFILE.");
-    let img2 = img.brighten(brighten_amount);
-    img2.save(outfile).expect("Failed writing OUTFILE.");
-}
-
-fn crop(infile: &String, outfile: &String, x: u32, y: u32, width: u32, height: u32) {
-    let img = image::open(infile).expect("Failed to open INFILE.");
-    let img2 = img.crop_imm(x, y, width, height);
-    img2.save(outfile).expect("Failed writing OUTFILE.");
-}
-
-fn rotate(infile: &String, outfile: &String, rotation: f32) {
-    let img = image::open(infile).expect("Failed to open INFILE.");
-    let img2;
+fn rotate(img: DynamicImage, rotation: f32) -> DynamicImage {
     if rotation <= 90.0 {
-        img2 = img.rotate90();
+        img.rotate90()
     } else if rotation <= 180.0 {
-        img2 = img.rotate180();
+        img.rotate180()
     } else {
-        img2 = img.rotate270();
+        img.rotate270()
     }
-    img2.save(outfile).expect("Failed writing OUTFILE.");
-}
-
-fn invert(infile: &String, outfile: &String) {
-    let mut img = image::open(infile).expect("Failed to open INFILE.");
-    img.invert();
-    img.save(outfile).expect("Failed writing OUTFILE.");
-}
-
-fn grayscale(infile: &String, outfile: &String) {
-    let img = image::open(infile).expect("Failed to open INFILE.");
-    let img2 = img.grayscale();
-    img2.save(outfile).expect("Failed writing OUTFILE.");
 }
 
 fn generate(outfile: String) {
