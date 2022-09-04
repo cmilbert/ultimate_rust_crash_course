@@ -35,7 +35,8 @@ fn main() -> Result<(), ImageError> {
     println!("Using input file: {}", args.infile);
     println!("Using output file: {}", args.outfile);
 
-    if args.generate || args.fractal {  // These operations do not require an input file
+    if args.generate || args.fractal {
+        // These operations do not require an input file
         if args.fractal {
             fractal(&args.outfile);
         }
@@ -95,16 +96,11 @@ fn generate(outfile: &String) {
     let mut imgbuf = image::ImageBuffer::new(width, height);
 
     // Iterate over the coordinates and pixels of the image -- see fractal() for an example
-    for (_x, _y, pixel) in imgbuf.enumerate_pixels_mut() {
+    for (x, y, pixel) in imgbuf.enumerate_pixels_mut() {
         // Use red and blue to be a pretty gradient background
-        // let red = (0.3 * x as f32) as u8;
-        // let green = (0.3 * x as f32) as u8;
-        // let blue = (0.3 * x as f32) as u8;
-
-        // Set the image to some solid color. -- see fractal() for an example
-        let red: u8 = 50;
-        let blue: u8 = 50;
-        let green: u8 = 0;
+        let red: u8 = if x % 10 == 0 { 255 } else { 100 };
+        let green: u8 = if y % 10 == 0 { 255 } else { 100 };
+        let blue: u8 = if (x + y) % 10 == 0 { 255 } else { 100 };
 
         *pixel = image::Rgb([red, green, blue]);
     }
