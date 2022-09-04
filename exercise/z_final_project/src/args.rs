@@ -22,8 +22,12 @@ pub struct Args {
     pub brighten: i32,
     
     /// Generate a fractal
-    #[clap(short, long)]
+    #[clap(long)]
     pub fractal: bool,
+
+    /// Generate a fun image
+    #[clap(long)]
+    pub generate: bool,
 
     /// Inverts an image
     #[clap(short, long)]

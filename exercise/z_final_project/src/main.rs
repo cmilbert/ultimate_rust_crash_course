@@ -26,56 +26,53 @@
 //     let positive_number: u32 = some_string.parse().expect("Failed to parse a number");
 
 use clap::Parser;
+use image::{DynamicImage, ImageError};
 use mirage::args::Args;
-use image::{ImageError, DynamicImage};
 
-fn main() -> Result<(), ImageError>{
+fn main() -> Result<(), ImageError> {
     let args = Args::parse();
 
     println!("Using input file: {}", args.infile);
     println!("Using output file: {}", args.outfile);
 
-    let mut img = image::open(args.infile.clone()).expect("Failed to open INFILE.");
+    if args.generate || args.fractal {  // These operations do not require an input file
+        if args.fractal {
+            fractal(&args.outfile);
+        }
 
-    if args.blur != 0.0 {
-        img = img.blur(args.blur);
+        if args.generate {
+            generate(&args.outfile);
+        }
+    } else {
+        let mut img = image::open(args.infile.clone()).expect("Failed to open INFILE.");
+
+        if args.blur != 0.0 {
+            img = img.blur(args.blur);
+        }
+
+        if args.brighten != 0 {
+            img = img.brighten(args.brighten);
+        }
+
+        if args.invert {
+            img.invert();
+        }
+
+        if args.grayscale {
+            img = img.grayscale();
+        }
+
+        if args.rotation != 0.0 {
+            img = rotate(img.clone(), args.rotation);
+        }
+
+        if args.width != 0 && args.height != 0 {
+            img = img.crop(args.x_offset, args.y_offset, args.width, args.height);
+        } else if args.width != 0 || args.height != 0 {
+            println!("Crop requires a width and height");
+        }
+        img.save(args.outfile).expect("Failed writing OUTFILE.");
     }
-
-    if args.brighten != 0 {
-        img = img.brighten(args.brighten);
-    }
-
-    if args.fractal {
-        fractal(&args.outfile);
-    }
-
-    if args.invert {
-        img.invert();
-    }
-
-    if args.grayscale {
-        img = img.grayscale();
-    }
-
-    if args.rotation != 0.0 {
-        img = rotate(img.clone(), args.rotation);
-    }
-
-    if args.width != 0 && args.height != 0 {
-        img = img.crop(
-            args.x_offset,
-            args.y_offset,
-            args.width,
-            args.height,
-        );
-    } else if args.width != 0 || args.height != 0 {
-        println!("Crop requires a width and height");
-    }
-
-        // **OPTION**
-    // Generate -- see the generate() function below -- this should be sort of like "fractal()"!
-
-    img.save(args.outfile).expect("Failed writing OUTFILE.");
 
     Ok(())
 }
@@ -90,19 +87,29 @@ fn rotate(img: DynamicImage, rotation: f32) -> DynamicImage {
     }
 }
 
-fn generate(outfile: String) {
+fn generate(outfile: &String) {
     // Create an ImageBuffer -- see fractal() for an example
+    let width = 800;
+    let height = 800;
+
+    let mut imgbuf = image::ImageBuffer::new(width, height);
 
     // Iterate over the coordinates and pixels of the image -- see fractal() for an example
+    for (_x, _y, pixel) in imgbuf.enumerate_pixels_mut() {
+        // Use red and blue to be a pretty gradient background
+        // let red = (0.3 * x as f32) as u8;
+        // let green = (0.3 * x as f32) as u8;
+        // let blue = (0.3 * x as f32) as u8;
 
-    // Set the image to some solid color. -- see fractal() for an example
+        // Set the image to some solid color. -- see fractal() for an example
+        let red: u8 = 50;
+        let blue: u8 = 50;
+        let green: u8 = 0;
 
-    // Challenge: parse some color data from the command-line, pass it through
-    // to this function to use for the solid color.
+        *pixel = image::Rgb([red, green, blue]);
+    }
 
-    // Challenge 2: Generate something more interesting!
-
-    // See blur() for an example of how to save the image
+    imgbuf.save(outfile).unwrap();
 }
 
 // This code was adapted from https://github.com/PistonDevelopers/image
@@ -140,21 +147,3 @@ fn fractal(outfile: &String) {
 
     imgbuf.save(outfile).unwrap();
 }
-
-// **SUPER CHALLENGE FOR LATER** - Let's face it, you don't have time for this during class.
-//
-// Make all of the subcommands stackable!
-//
-// For example, if you run:
-//
-//   cargo run infile.png outfile.png blur 2.5 invert rotate 180 brighten 10
-//
-// ...then your program would:
-// - read infile.png
-// - apply a blur of 2.5
-// - invert the colors
-// - rotate the image 180 degrees clockwise
-// - brighten the image by 10
-// - and write the result to outfile.png
-//
-// Good luck!
