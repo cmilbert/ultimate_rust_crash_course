@@ -1,69 +1,55 @@
-use clap::{App, Arg};
+// use clap::{App, Arg};
+use clap::Parser;
 
+/// Simple image modificaiton program
+#[derive(Parser, Debug)]
+#[clap(author = "Chris Milbert", version = "0.1", about, long_about = None)]
 pub struct Args {
+   /// Input file to transform
+    #[clap(required = true, value_parser, index = 1)]
     pub infile: String,
+
+    /// Output file for transformation
+    #[clap(required = true, value_parser, index = 2)]    
     pub outfile: String,
-    pub blur: bool,
-    pub blur_amount: f32,
+
+    /// Blur amount
+    #[clap(short, long, value_parser, default_value_t = 0.0)]
+    pub blur: f32,
+    
+    /// Brighten amount
+    #[clap(short = 'l', long, value_parser, default_value_t = 0)]
+    pub brighten: i32,
+    
+    /// Generate a fractal
+    #[clap(short, long)]
     pub fractal: bool,
-}
 
-impl Args {
-    pub fn parse() -> Self {
-        let matches = App::new("Mirage Image Processor")
-            .version("0.1")
-            .about("Provides image processing capabilities")
-            .arg(
-                Arg::with_name("INPUT_FILE")
-                    .required(true)
-                    .help("Input file to process")
-                    .index(1),
-            )
-            .arg(
-                Arg::with_name("OUTPUT_FILE")
-                    .required(true)
-                    .help("Output file for results")
-                    .index(2),
-            )
-            .arg(
-                Arg::with_name("blur")
-                    .short('b')
-                    .long("blur")
-                    .value_name("AMOUNT")
-                    .help("blurs image by x amount")
-                    .takes_value(true),
-            )
-            .arg(
-                Arg::with_name("fractal")
-                    .short('f')
-                    .long("fractal")
-                    .help("blurs image by x amount")
-                    .takes_value(false),
-            )
-            .get_matches();
+    /// Inverts an image
+    #[clap(short, long)]
+    pub invert: bool,
 
-        let infile = matches
-            .value_of("INPUT_FILE")
-            .unwrap_or_default()
-            .to_string();
-        let outfile = matches
-            .value_of("OUTPUT_FILE")
-            .unwrap_or_default()
-            .to_string();
-        let blur = matches.is_present("blur");
-        let blur_amount: f32 = matches
-            .value_of("blur")
-            .unwrap_or_default()
-            .parse()
-            .unwrap();
-        let fractal = matches.is_present("fractal");
+    /// Converts an image to greyscale
+    #[clap(short, long)]
+    pub grayscale: bool,
 
-        Self {
-            infile,
-            outfile,
-            blur,
-            blur_amount,
-            fractal,
-        }
-    }
+    /// Rotate image by degrees
+    #[clap(short, long, value_parser, default_value_t = 0.0)]
+    pub rotation: f32,
+
+    /// Crop x offset
+    #[clap(short, long, value_parser, default_value_t = 0)]
+    pub x_offset: u32,
+    
+    /// Crop y offset
+    #[clap(short, long, value_parser, default_value_t = 0)]
+    pub y_offset: u32,
+
+    /// Crop width
+    #[clap(short, long, value_parser, default_value_t = 0)]
+    pub width: u32,
+
+    /// Crop height
+    #[clap(short, long, value_parser, default_value_t = 0)]
+    pub height: u32,
 }

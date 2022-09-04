@@ -5,6 +5,6 @@ authors = ["Nathan Stocks <nathan.stocks@gmail.com>", "Chris Milbert"]
 edition = "2018"
 
 [dependencies]
-clap = "3.2.20"
+clap = { version = "3.2.20", features = ["derive"] }
 image = "0.24.3"
 num-complex = "0.4.2"
